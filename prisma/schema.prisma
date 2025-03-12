@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Memory {
+  id            String         @id @default(cuid())
+  title         String
+  description   String?
+  date          DateTime
+  locationId    String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  mediaItems    Media[]
+  location      Location?      @relation(fields: [locationId], references: [id])
+  timelineEvent TimelineEvent?
+}
+
+model TimelineEvent {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  date        DateTime
+  importance  Int      @default(1)
+  memoryId    String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  memory      Memory   @relation(fields: [memoryId], references: [id])
+}
+
+model Location {
+  id        String   @id @default(cuid())
+  name      String
+  latitude  Float
+  longitude Float
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  memories  Memory[]
+}
+
+model Media {
+  id        String    @id @default(cuid())
+  url       String
+  type      MediaType
+  caption   String?
+  memoryId  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  memory    Memory    @relation(fields: [memoryId], references: [id])
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
